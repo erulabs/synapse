@@ -39,10 +39,11 @@ what sort order was used:
 import abc
 import logging
 from collections import namedtuple
-from typing import TYPE_CHECKING, Dict, Iterable, List, Optional, Tuple
+from typing import Dict, Iterable, List, Optional, Tuple
 
 from twisted.internet import defer
 
+from synapse.api.filtering import Filter
 from synapse.events import EventBase
 from synapse.logging.context import make_deferred_yieldable, run_in_background
 from synapse.storage._base import SQLBaseStore
@@ -51,9 +52,6 @@ from synapse.storage.databases.main.events_worker import EventsWorkerStore
 from synapse.storage.engines import BaseDatabaseEngine, PostgresEngine
 from synapse.types import EventStreamToken
 from synapse.util.caches.stream_change_cache import StreamChangeCache
-
-if TYPE_CHECKING:
-    from synapse.api.filtering import Filter
 
 logger = logging.getLogger(__name__)
 
