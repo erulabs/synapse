@@ -65,7 +65,7 @@ class TransactionStore(SQLBaseStore):
             origin(str)
 
         Returns:
-            tuple: None if we have not previously responded to
+            Awaitable[Tuple|None]: None if we have not previously responded to
             this transaction or a 2-tuple of (int, dict)
         """
 

@@ -49,7 +49,7 @@ class KeyStore(SQLBaseStore):
                 iterable of (server_name, key-id) tuples to fetch keys for
 
         Returns:
-            Deferred: resolves to dict[Tuple[str, str], FetchKeyResult|None]:
+            Awaitable: resolves to dict[Tuple[str, str], FetchKeyResult|None]:
                 map from (server_name, key_id) -> FetchKeyResult, or None if the key is
                 unknown
         """
@@ -182,7 +182,7 @@ class KeyStore(SQLBaseStore):
         Args:
             server_keys (list): List of (server_name, key_id, source) triplets.
         Returns:
-            Deferred[dict[Tuple[str, str, str|None], list[dict]]]:
+            Awaitable[dict[Tuple[str, str, str|None], list[dict]]]:
                 Dict mapping (server_name, key_id, source) triplets to lists of dicts
         """
 

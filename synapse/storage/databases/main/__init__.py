@@ -481,7 +481,7 @@ class DataStore(
 
         Args:
         Returns:
-            defer.Deferred: resolves to list[dict[str, Any]]
+            Awaitable: resolves to list[dict[str, Any]]
         """
         return self.db_pool.simple_select_list(
             table="users",
@@ -511,7 +511,7 @@ class DataStore(
             guests (bool): whether to in include guest users
             deactivated (bool): whether to include deactivated users
         Returns:
-            defer.Deferred: resolves to list[dict[str, Any]], int
+            Awaitable: resolves to list[dict[str, Any]], int
         """
 
         def get_users_paginate_txn(txn):
@@ -560,7 +560,7 @@ class DataStore(
             term (str): search term
             col (str): column to query term should be matched to
         Returns:
-            defer.Deferred: resolves to list[dict[str, Any]]
+            Awaitable: resolves to list[dict[str, Any]]
         """
         return self.db_pool.simple_search_list(
             table="users",

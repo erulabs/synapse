@@ -128,7 +128,7 @@ class EventsWorkerStore(SQLBaseStore):
             event_id (str)
 
         Returns:
-            Deferred[int|None]: Timestamp in milliseconds, or None for events
+            Awaitable[int|None]: Timestamp in milliseconds, or None for events
             that were persisted before received_ts was implemented.
         """
         return self.db_pool.simple_select_one_onecol(
@@ -835,7 +835,7 @@ class EventsWorkerStore(SQLBaseStore):
                  which we can look up the redaaction events. Map from event id to event.
 
         Returns:
-            Deferred[EventBase|None]: if the event should be redacted, a pruned
+            EventBase|None: if the event should be redacted, a pruned
                 event object. Otherwise, None.
         """
         if original_ev.type == "m.room.create":
@@ -954,7 +954,7 @@ class EventsWorkerStore(SQLBaseStore):
             room_id (str)
 
         Returns:
-            Deferred[int]
+            Awaitable[int]
         """
         return self.db_pool.runInteraction(
             "get_current_state_event_counts",
@@ -999,7 +999,7 @@ class EventsWorkerStore(SQLBaseStore):
             current_id: the maximum stream_id to return up to
             limit: the maximum number of rows to return
 
-        Returns: Deferred[List[Tuple]]
+        Returns: Awaitable[List[Tuple]]
             a list of events stream rows. Each tuple consists of a stream id as
             the first element, followed by fields suitable for casting into an
             EventsStreamRow.
@@ -1031,7 +1031,7 @@ class EventsWorkerStore(SQLBaseStore):
             last_id: the last stream_id from the previous batch.
             current_id: the maximum stream_id to return up to
 
-        Returns: Deferred[List[Tuple]]
+        Returns: Awaitable[List[Tuple]]
             a list of events stream rows. Each tuple consists of a stream id as
             the first element, followed by fields suitable for casting into an
             EventsStreamRow.
@@ -1230,7 +1230,7 @@ class EventsWorkerStore(SQLBaseStore):
         """Retrieve the entry with the lowest expiry timestamp in the event_expiry
         table, or None if there's no more event to expire.
 
-        Returns: Deferred[Optional[Tuple[str, int]]]
+        Returns: Awaitable[Optional[Tuple[str, int]]]
             A tuple containing the event ID as its first element and an expiry timestamp
             as its second one, if there's at least one row in the event_expiry table.
             None otherwise.

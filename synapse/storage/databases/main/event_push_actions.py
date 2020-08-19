@@ -394,7 +394,7 @@ class EventPushActionsWorkerStore(SQLBaseStore):
             min_stream_ordering (int)
 
         Returns:
-            Deferred[bool]: True if there may be push to process, False if
+            Awaitable[bool]: True if there may be push to process, False if
             there definitely isn't.
         """
 
@@ -423,7 +423,7 @@ class EventPushActionsWorkerStore(SQLBaseStore):
                 a string or dict.
 
         Returns:
-            Deferred
+            Awaitable
         """
 
         if not user_id_actions:
@@ -519,7 +519,7 @@ class EventPushActionsWorkerStore(SQLBaseStore):
             ts (int): timestamp in millis
 
         Returns:
-            Deferred[int]: stream ordering of the first event received on/after
+            Awaitable[int]: stream ordering of the first event received on/after
                 the timestamp
         """
         return self.db_pool.runInteraction(

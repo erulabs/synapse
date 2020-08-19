@@ -341,7 +341,7 @@ class StateGroupStorage(object):
             state_group: The state group used to retrieve state deltas.
 
         Returns:
-            Deferred[Tuple[Optional[int], Optional[StateMap[str]]]]:
+            Awaitable[Tuple[Optional[int], Optional[StateMap[str]]]]:
                 (prev_group, delta_ids)
         """
 
@@ -525,7 +525,7 @@ class StateGroupStorage(object):
             state_filter: The state filter used to fetch state from the database.
 
         Returns:
-            A deferred dict from (type, state_key) -> state_event
+            A dict from (type, state_key) -> state_event
         """
         state_map = await self.get_state_ids_for_events([event_id], state_filter)
         return state_map[event_id]
@@ -567,7 +567,7 @@ class StateGroupStorage(object):
                 to event_id.
 
         Returns:
-            Deferred[int]: The state group ID
+            Awaitable[int]: The state group ID
         """
         return self.stores.state.store_state_group(
             event_id, room_id, prev_group, delta_ids, current_state_ids

@@ -277,7 +277,7 @@ class ReceiptsWorkerStore(SQLBaseStore):
         `current_id` inclusive.
 
         Returns:
-            Deferred[List[str]]
+            Awaitable[List[str]]
         """
 
         if last_id == current_id:

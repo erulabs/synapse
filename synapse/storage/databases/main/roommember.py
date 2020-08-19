@@ -186,7 +186,7 @@ class RoomMemberWorkerStore(EventsWorkerStore):
         Args:
             room_id: The room ID to query
         Returns:
-            Deferred[dict[str, MemberSummary]:
+            Awaitable[dict[str, MemberSummary]:
                 dict of membership states, pointing to a MemberSummary named tuple.
         """
 
@@ -367,7 +367,7 @@ class RoomMemberWorkerStore(EventsWorkerStore):
             user_id
 
         Returns:
-            Deferred[frozenset[GetRoomsForUserWithStreamOrdering]]: Returns
+            Awaitable[frozenset[GetRoomsForUserWithStreamOrdering]]: Returns
             the rooms the user is in currently, along with the stream ordering
             of the most recent join for that user and room.
         """
@@ -718,7 +718,7 @@ class RoomMemberWorkerStore(EventsWorkerStore):
             user_id
 
         Returns:
-            Deferred[set[str]]
+            Awaitable[set[str]]
         """
 
         def _get_forgotten_rooms_for_user_txn(txn):

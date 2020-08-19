@@ -547,7 +547,7 @@ class StreamWorkerStore(EventsWorkerStore, SQLBaseStore):
             stream_ordering:
 
         Returns:
-            Deferred[(int, int, str)]:
+            Awaitable[(int, int, str)]:
                 (stream ordering, topological ordering, event_id)
         """
 

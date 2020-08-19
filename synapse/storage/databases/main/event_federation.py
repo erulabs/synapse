@@ -15,7 +15,7 @@
 import itertools
 import logging
 from queue import Empty, PriorityQueue
-from typing import Dict, Iterable, List, Set, Tuple
+from typing import Awaitable, Dict, Iterable, List, Set, Tuple
 
 from synapse.api.errors import StoreError
 from synapse.events import EventBase
@@ -59,7 +59,7 @@ class EventFederationWorkerStore(EventsWorkerStore, SignatureWorkerStore, SQLBas
             include_given: include the given events in result
 
         Returns:
-            list of event_ids
+            An awaitable which resolve to a list of event_ids
         """
         return await self.db_pool.runInteraction(
             "get_auth_chain_ids",
@@ -95,7 +95,9 @@ class EventFederationWorkerStore(EventsWorkerStore, SignatureWorkerStore, SQLBas
 
         return list(results)
 
-    def get_auth_chain_difference(self, state_sets: List[Set[str]]):
+    def get_auth_chain_difference(
+        self, state_sets: List[Set[str]]
+    ) -> Awaitable[Set[str]]:
         """Given sets of state events figure out the auth chain difference (as
         per state res v2 algorithm).
 
@@ -104,7 +106,7 @@ class EventFederationWorkerStore(EventsWorkerStore, SignatureWorkerStore, SQLBas
         chain.
 
         Returns:
-            Deferred[Set[str]]
+            An awaitable which resolves to the set of the difference in auth chains.
         """
 
         return self.db_pool.runInteraction(
@@ -293,7 +295,7 @@ class EventFederationWorkerStore(EventsWorkerStore, SignatureWorkerStore, SQLBas
         else:
             return max(row["depth"] for row in rows)
 
-    def get_prev_events_for_room(self, room_id: str):
+    def get_prev_events_for_room(self, room_id: str) -> Awaitable[List[str]]:
         """
         Gets a subset of the current forward extremities in the given room.
 
@@ -301,10 +303,10 @@ class EventFederationWorkerStore(EventsWorkerStore, SignatureWorkerStore, SQLBas
         events which refer to hundreds of prev_events.
 
         Args:
-            room_id (str): room_id
+            room_id: room_id
 
         Returns:
-            Deferred[List[str]]: the event ids of the forward extremites
+            An awaitable which resolves to the event ids of the forward extremities.
 
         """
 
@@ -328,17 +330,20 @@ class EventFederationWorkerStore(EventsWorkerStore, SignatureWorkerStore, SQLBas
 
         return [row[0] for row in txn]
 
-    def get_rooms_with_many_extremities(self, min_count, limit, room_id_filter):
+    def get_rooms_with_many_extremities(
+        self, min_count: int, limit: int, room_id_filter: Iterable[str]
+    ) -> Awaitable[List[str]]:
         """Get the top rooms with at least N extremities.
 
         Args:
-            min_count (int): The minimum number of extremities
-            limit (int): The maximum number of rooms to return.
-            room_id_filter (iterable[str]): room_ids to exclude from the results
+            min_count: The minimum number of extremities
+            limit: The maximum number of rooms to return.
+            room_id_filter: room_ids to exclude from the results
 
         Returns:
-            Deferred[list]: At most `limit` room IDs that have at least
-            `min_count` extremities, sorted by extremity count.
+            An awaitable which resolves to:
+                At most `limit` room IDs that have at least `min_count`
+                extremities, sorted by extremity count.
         """
 
         def _get_rooms_with_many_extremities_txn(txn):
@@ -377,7 +382,7 @@ class EventFederationWorkerStore(EventsWorkerStore, SignatureWorkerStore, SQLBas
         )
 
     def get_min_depth(self, room_id):
-        """ For hte given room, get the minimum depth we have seen for it.
+        """For the given room, get the minimum depth we have seen for it.
         """
         return self.db_pool.runInteraction(
             "get_min_depth", self._get_min_depth_interaction, room_id
@@ -394,7 +399,9 @@ class EventFederationWorkerStore(EventsWorkerStore, SignatureWorkerStore, SQLBas
 
         return int(min_depth) if min_depth is not None else None
 
-    def get_forward_extremeties_for_room(self, room_id, stream_ordering):
+    def get_forward_extremeties_for_room(
+        self, room_id: str, stream_ordering: int
+    ) -> Awaitable[List[str]]:
         """For a given room_id and stream_ordering, return the forward
         extremeties of the room at that point in "time".
 
@@ -402,11 +409,11 @@ class EventFederationWorkerStore(EventsWorkerStore, SignatureWorkerStore, SQLBas
         stream_orderings from that point.
 
         Args:
-            room_id (str):
-            stream_ordering (int):
+            room_id:
+            stream_ordering:
 
         Returns:
-            deferred, which resolves to a list of event_ids
+            An awaitable which resolves to a list of event_ids
         """
         # We want to make the cache more effective, so we clamp to the last
         # change before the given ordering.
@@ -454,15 +461,14 @@ class EventFederationWorkerStore(EventsWorkerStore, SignatureWorkerStore, SQLBas
             "get_forward_extremeties_for_room", get_forward_extremeties_for_room_txn
         )
 
-    async def get_backfill_events(self, room_id, event_list, limit):
+    async def get_backfill_events(self, room_id: str, event_list: list, limit: int):
         """Get a list of Events for a given topic that occurred before (and
         including) the events in event_list. Return a list of max size `limit`
 
         Args:
-            txn
-            room_id (str)
-            event_list (list)
-            limit (int)
+            room_id
+            event_list
+            limit
         """
         event_ids = await self.db_pool.runInteraction(
             "get_backfill_events",

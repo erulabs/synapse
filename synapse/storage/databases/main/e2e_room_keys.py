@@ -164,7 +164,7 @@ class EndToEndRoomKeyStore(SQLBaseStore):
                 that we want to query
 
         Returns:
-           Deferred[dict[str, dict[str, dict]]]: a map of room IDs to session IDs to room key
+           Awaitable[dict[str, dict[str, dict]]]: a map of room IDs to session IDs to room key
         """
 
         return self.db_pool.runInteraction(
@@ -291,7 +291,7 @@ class EndToEndRoomKeyStore(SQLBaseStore):
         Raises:
             StoreError: with code 404 if there are no e2e_room_keys_versions present
         Returns:
-            A deferred dict giving the info metadata for this backup version, with
+            An Awaitable dict giving the info metadata for this backup version, with
             fields including:
                 version(str)
                 algorithm(str)
@@ -336,7 +336,7 @@ class EndToEndRoomKeyStore(SQLBaseStore):
             info(dict): the info about the backup version to be created
 
         Returns:
-            A deferred string for the newly created version ID
+            An Awaitable string for the newly created version ID
         """
 
         def _create_e2e_room_keys_version_txn(txn):

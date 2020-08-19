@@ -262,7 +262,7 @@ class StatsStore(StateDeltasStore):
             size (int): How many entries to return.
 
         Returns:
-            Deferred[list[dict]], where the dict has the keys of
+            Awaitable[list[dict]], where the dict has the keys of
             ABSOLUTE_STATS_FIELDS[stats_type],  and "bucket_size" and "end_ts".
         """
         return self.db_pool.runInteraction(
@@ -308,7 +308,7 @@ class StatsStore(StateDeltasStore):
         being calculated.
 
         Returns:
-            Deferred[int]
+            Awaitable[int]
         """
         table, id_col = TYPE_TO_TABLE[stats_type]
 
@@ -330,7 +330,7 @@ class StatsStore(StateDeltasStore):
             stream_id (int): Current position.
 
         Returns:
-            Deferred
+            Awaitable
         """
 
         def _bulk_update_stats_delta_txn(txn):
@@ -654,7 +654,7 @@ class StatsStore(StateDeltasStore):
             max_pos (int)
 
         Returns:
-            Deferred[dict[str, dict[str, int]]]: Mapping of room ID to field
+            Awaitable[dict[str, dict[str, int]]]: Mapping of room ID to field
             changes.
         """
 

@@ -55,7 +55,7 @@ class DeviceWorkerStore(SQLBaseStore):
             user_id: The ID of the user which owns the device
             device_id: The ID of the device to retrieve
         Returns:
-            defer.Deferred for a dict containing the device information
+            Awaitable for a dict containing the device information
         Raises:
             StoreError: if the device is not found
         """
@@ -485,7 +485,7 @@ class DeviceWorkerStore(SQLBaseStore):
         """Get all devices (with any device keys) for a user
 
         Returns:
-            Deferred which resolves to (stream_id, devices)
+            Awaitable which resolves to (stream_id, devices)
         """
         return self.db_pool.runInteraction(
             "get_devices_with_keys_by_user",
@@ -1016,7 +1016,7 @@ class DeviceStore(DeviceWorkerStore, DeviceBackgroundUpdateStore):
             stream_id: the version of the device list
 
         Returns:
-            Deferred[None]
+            Awaitable[None]
         """
         return self.db_pool.runInteraction(
             "update_remote_device_list_cache_entry",
@@ -1084,7 +1084,7 @@ class DeviceStore(DeviceWorkerStore, DeviceBackgroundUpdateStore):
             stream_id: the version of the device list
 
         Returns:
-            Deferred[None]
+            Awaitable[None]
         """
         return self.db_pool.runInteraction(
             "update_remote_device_list_cache",

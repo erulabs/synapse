@@ -223,7 +223,7 @@ class ApplicationServiceTransactionWorkerStore(
             service(ApplicationService): The application service which was sent
             this transaction.
         Returns:
-            A Deferred which resolves if this transaction was stored
+            A Awaitable which resolves if this transaction was stored
             successfully.
         """
         txn_id = int(txn_id)

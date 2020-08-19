@@ -39,7 +39,7 @@ class PurgeEventsStore(StateGroupWorkerStore, SQLBaseStore):
                 state groups).
 
         Returns:
-            Deferred[set[int]]: The set of state groups that are referenced by
+            Awaitable[set[int]]: The set of state groups that are referenced by
             deleted events.
         """
 
@@ -290,7 +290,7 @@ class PurgeEventsStore(StateGroupWorkerStore, SQLBaseStore):
             room_id (str)
 
         Returns:
-            Deferred[List[int]]: The list of state groups to delete.
+            Awaitable[List[int]]: The list of state groups to delete.
         """
 
         return self.db_pool.runInteraction("purge_room", self._purge_room_txn, room_id)

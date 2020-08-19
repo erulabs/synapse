@@ -15,9 +15,7 @@
 
 import logging
 from collections import namedtuple
-from typing import Dict, Iterable, List, Set, Tuple
-
-from twisted.internet import defer
+from typing import Awaitable, Dict, Iterable, List, Set, Tuple
 
 from synapse.api.constants import EventTypes
 from synapse.storage._base import SQLBaseStore
@@ -383,7 +381,7 @@ class StateGroupDataStore(StateBackgroundUpdateStore, SQLBaseStore):
                 to event_id.
 
         Returns:
-            Deferred[int]: The state group ID
+            Awaitable[int]: The state group ID
         """
 
         def _store_state_group_txn(txn):
@@ -488,7 +486,7 @@ class StateGroupDataStore(StateBackgroundUpdateStore, SQLBaseStore):
 
     def purge_unreferenced_state_groups(
         self, room_id: str, state_groups_to_delete
-    ) -> defer.Deferred:
+    ) -> Awaitable:
         """Deletes no longer referenced state groups and de-deltas any state
         groups that reference them.
 

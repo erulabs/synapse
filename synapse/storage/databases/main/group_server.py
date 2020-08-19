@@ -77,7 +77,7 @@ class GroupServerWorkerStore(SQLBaseStore):
             include_private: Whether to return private rooms in results
 
         Returns:
-            Deferred[List[Dict[str, str|bool]]]: A list of dictionaries, each in the
+            Awaitable[List[Dict[str, str|bool]]]: A list of dictionaries, each in the
             form of:
 
             {
@@ -129,7 +129,7 @@ class GroupServerWorkerStore(SQLBaseStore):
             include_private: Whether to return private rooms in results
 
         Returns:
-            Deferred[Tuple[List, Dict]]: A tuple containing:
+            Awaitable[Tuple[List, Dict]]: A tuple containing:
 
                 * A list of dictionaries with the keys:
                     * "room_id": str, the room ID
@@ -270,8 +270,7 @@ class GroupServerWorkerStore(SQLBaseStore):
         Args:
             room_id (str): The ID of a room
         Returns:
-            Deferred[list[str]]: A twisted.Deferred containing a list of group ids
-                containing this room
+            Awaitable[list[str]]: a list of group ids containing this room
         """
         return self.db_pool.simple_select_onecol(
             table="group_rooms",
@@ -283,7 +282,8 @@ class GroupServerWorkerStore(SQLBaseStore):
     def get_users_for_summary_by_role(self, group_id, include_private=False):
         """Get the users and roles that should be included in a summary request
 
-        Returns ([users], [roles])
+        Returns:
+            Awaitable[([users], [roles])]
         """
 
         def _get_users_for_summary_txn(txn):
@@ -382,7 +382,8 @@ class GroupServerWorkerStore(SQLBaseStore):
                 "is_privileged": False,
             }
 
-        Returns an empty dict if the user is not join/invite/etc
+        Returns:
+             An awaitable which resolves to an empty dict if the user is not join/invite/etc
         """
 
         def _get_users_membership_in_group_txn(txn):
@@ -1262,7 +1263,7 @@ class GroupServerStore(GroupServerWorkerStore):
             group_id (str)
 
         Returns:
-            Deferred
+            Awaitable
         """
 
         def _delete_group_txn(txn):

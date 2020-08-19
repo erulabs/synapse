@@ -42,7 +42,7 @@ class StateDeltasStore(SQLBaseStore):
                - ie, an upper limit to return changes from.
 
         Returns:
-            Deferred[tuple[int, list[dict]]: A tuple consisting of:
+            Awaitable[tuple[int, list[dict]]: A tuple consisting of:
                - the stream id which these results go up to
                - list of current_state_delta_stream rows. If it is empty, we are
                  up to date.

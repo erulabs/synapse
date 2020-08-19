@@ -84,15 +84,15 @@ class RegistrationWorkerStore(SQLBaseStore):
         return is_trial
 
     @cached()
-    def get_user_by_access_token(self, token):
+    def get_user_by_access_token(self, token: str) -> Awaitable[Optional[dict]]:
         """Get a user from the given access token.
 
         Args:
-            token (str): The access token of a user.
+            token: The access token of a user.
         Returns:
-            defer.Deferred: None, if the token did not match, otherwise dict
-                including the keys `name`, `is_guest`, `device_id`, `token_id`,
-                `valid_until_ms`.
+            None, if the token did not match, otherwise dict
+            including the keys `name`, `is_guest`, `device_id`, `token_id`,
+            `valid_until_ms`.
         """
         return self.db_pool.runInteraction(
             "get_user_by_access_token", self._query_for_auth, token
@@ -281,13 +281,12 @@ class RegistrationWorkerStore(SQLBaseStore):
 
         return bool(res) if res else False
 
-    def set_server_admin(self, user, admin):
+    def set_server_admin(self, user: UserID, admin: bool) -> Awaitable[None]:
         """Sets whether a user is an admin of this homeserver.
 
         Args:
-            user (UserID): user ID of the user to test
-            admin (bool): true iff the user is to be a server admin,
-                false otherwise.
+            user: user ID of the user to test
+            admin: true iff the user is to be a server admin, false otherwise.
         """
 
         def set_server_admin_txn(txn):
@@ -364,9 +363,13 @@ class RegistrationWorkerStore(SQLBaseStore):
         )
         return True if res == UserTypes.SUPPORT else False
 
-    def get_users_by_id_case_insensitive(self, user_id):
+    def get_users_by_id_case_insensitive(
+        self, user_id: str
+    ) -> Awaitable[Dict[str, str]]:
         """Gets users that match user_id case insensitively.
-        Returns a mapping of user_id -> password_hash.
+
+        Returns:
+             A mapping of user_id -> password_hash.
         """
 
         def f(txn):
@@ -587,7 +590,7 @@ class RegistrationWorkerStore(SQLBaseStore):
             user_id (str): The ID of the user to retrieve threepids for
 
         Returns:
-            Deferred[list[dict]]: List of dictionaries containing the following:
+            Awaitable[list[dict]]: List of dictionaries containing the following:
                 medium (str): The medium of the threepid (e.g "email")
                 address (str): The address of the threepid (e.g "bob@example.com")
         """
@@ -610,7 +613,7 @@ class RegistrationWorkerStore(SQLBaseStore):
             id_server (str)
 
         Returns:
-            Deferred
+            Awaitable
         """
         return self.db_pool.simple_delete(
             table="user_threepid_id_server",
@@ -633,7 +636,7 @@ class RegistrationWorkerStore(SQLBaseStore):
             address (str)
 
         Returns:
-            Deferred[list[str]]: Resolves to a list of identity servers
+            Awaitable[list[str]]: Resolves to a list of identity servers
         """
         return self.db_pool.simple_select_onecol(
             table="user_threepid_id_server",
@@ -680,7 +683,7 @@ class RegistrationWorkerStore(SQLBaseStore):
                 perform no filtering
 
         Returns:
-            Deferred[dict|None]: A dict containing the following:
+            Awaitable[dict|None]: A dict containing the following:
                 * address - address of the 3pid
                 * medium - medium of the 3pid
                 * client_secret - a secret provided by the client for this validation session
@@ -975,7 +978,7 @@ class RegistrationStore(RegistrationBackgroundUpdateStore):
             StoreError if the user_id could not be registered.
 
         Returns:
-            Deferred
+            Awaitable
         """
         return self.db_pool.runInteraction(
             "register_user",
@@ -1177,7 +1180,7 @@ class RegistrationStore(RegistrationBackgroundUpdateStore):
                 If None, tokens associated with any device (or no device) will
                 be deleted
         Returns:
-            defer.Deferred[list[str, int, str|None, int]]: a list of
+            Awaitable[list[str, int, str|None, int]]: a list of
                 (token, token id, device id) for each of the deleted tokens
         """
 
@@ -1288,7 +1291,7 @@ class RegistrationStore(RegistrationBackgroundUpdateStore):
                 expired
 
         Returns:
-            deferred str|None: A str representing a link to redirect the user
+            Awaitable str|None: A str representing a link to redirect the user
             to if there is one.
         """
 

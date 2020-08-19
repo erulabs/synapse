@@ -64,7 +64,7 @@ class RelationsWorkerStore(SQLBaseStore):
                 token, or up to the end if None.
 
         Returns:
-            Deferred[PaginationChunk]: List of event IDs that match relations
+            Awaitable[PaginationChunk]: List of event IDs that match relations
             requested. The rows are of the form `{"event_id": "..."}`.
         """
 
@@ -165,7 +165,7 @@ class RelationsWorkerStore(SQLBaseStore):
 
 
         Returns:
-            Deferred[PaginationChunk]: List of groups of annotations that
+            Awaitable[PaginationChunk]: List of groups of annotations that
             match. Each row is a dict with `type`, `key` and `count` fields.
         """
 
@@ -290,7 +290,7 @@ class RelationsWorkerStore(SQLBaseStore):
             sender (str): The sender of the annotation
 
         Returns:
-            Deferred[bool]
+            Awaitable[bool]
         """
 
         sql = """

@@ -198,7 +198,7 @@ class DeviceInboxWorkerStore(SQLBaseStore):
             destination(str): The destination server_name
             up_to_stream_id(int): Where to delete messages up to.
         Returns:
-            A deferred that resolves when the messages have been deleted.
+            An Awaitable that resolves when the messages have been deleted.
         """
 
         def delete_messages_for_remote_destination_txn(txn):

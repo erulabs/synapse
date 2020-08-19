@@ -57,7 +57,7 @@ class MonthlyActiveUsersWorkerStore(SQLBaseStore):
         method to return anything other than native matrix users.
 
         Returns:
-            Deferred[dict]: dict that includes a mapping between app_service_id
+            Awaitable[dict]: dict that includes a mapping between app_service_id
                 and the number of occurrences.
 
         """
@@ -105,7 +105,7 @@ class MonthlyActiveUsersWorkerStore(SQLBaseStore):
             Arguments:
                 user_id (str): user to add/update
             Return:
-                Deferred[int] : timestamp since last seen, None if never seen
+                Awaitable[int] : timestamp since last seen, None if never seen
 
         """
 

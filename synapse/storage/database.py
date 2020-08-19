@@ -20,6 +20,7 @@ from sys import intern
 from time import monotonic as monotonic_time
 from typing import (
     Any,
+    Awaitable,
     Callable,
     Dict,
     Iterable,
@@ -34,7 +35,6 @@ from typing import (
 from prometheus_client import Histogram
 
 from twisted.enterprise import adbapi
-from twisted.internet import defer
 
 from synapse.api.errors import StoreError
 from synapse.config.database import DatabaseConnectionConfig
@@ -506,8 +506,9 @@ class DatabasePool(object):
             self._txn_perf_counters.update(desc, duration)
             sql_txn_timer.labels(desc).observe(duration)
 
-    @defer.inlineCallbacks
-    def runInteraction(self, desc: str, func: Callable, *args: Any, **kwargs: Any):
+    async def runInteraction(
+        self, desc: str, func: Callable, *args: Any, **kwargs: Any
+    ) -> Any:
         """Starts a transaction on the database and runs a given function
 
         Arguments:
@@ -520,7 +521,7 @@ class DatabasePool(object):
             kwargs: named args to pass to `func`
 
         Returns:
-            Deferred: The result of func
+            The result of func
         """
         after_callbacks = []  # type: List[_CallbackListEntry]
         exception_callbacks = []  # type: List[_CallbackListEntry]
@@ -529,16 +530,14 @@ class DatabasePool(object):
             logger.warning("Starting db txn '%s' from sentinel context", desc)
 
         try:
-            result = yield defer.ensureDeferred(
-                self.runWithConnection(
-                    self.new_transaction,
-                    desc,
-                    after_callbacks,
-                    exception_callbacks,
-                    func,
-                    *args,
-                    **kwargs
-                )
+            result = await self.runWithConnection(
+                self.new_transaction,
+                desc,
+                after_callbacks,
+                exception_callbacks,
+                func,
+                *args,
+                **kwargs
             )
 
             for after_callback, after_args, after_kwargs in after_callbacks:
@@ -612,7 +611,7 @@ class DatabasePool(object):
             query - The query string to execute
             *args - Query args.
         Returns:
-            Deferred which results to the result of decoder(results)
+            Awaitable which results to the result of decoder(results)
         """
 
         def interaction(txn):
@@ -673,7 +672,7 @@ class DatabasePool(object):
 
     def simple_insert_many(
         self, table: str, values: List[Dict[str, Any]], desc: str
-    ) -> defer.Deferred:
+    ) -> Awaitable[None]:
         return self.runInteraction(desc, self.simple_insert_many_txn, table, values)
 
     @staticmethod
@@ -1027,7 +1026,7 @@ class DatabasePool(object):
         retcols: Iterable[str],
         allow_none: bool = False,
         desc: str = "simple_select_one",
-    ) -> defer.Deferred:
+    ) -> Awaitable[Optional[Dict[str, Any]]]:
         """Executes a SELECT query on the named table, which is expected to
         return a single row, returning multiple columns from it.
 
@@ -1049,7 +1048,7 @@ class DatabasePool(object):
         retcol: Iterable[str],
         allow_none: bool = False,
         desc: str = "simple_select_one_onecol",
-    ) -> defer.Deferred:
+    ) -> Awaitable[Optional[Any]]:
         """Executes a SELECT query on the named table, which is expected to
         return a single row, returning a single column from it.
 
@@ -1114,7 +1113,7 @@ class DatabasePool(object):
         keyvalues: Optional[Dict[str, Any]],
         retcol: str,
         desc: str = "simple_select_onecol",
-    ) -> defer.Deferred:
+    ) -> Awaitable[List[Any]]:
         """Executes a SELECT query on the named table, which returns a list
         comprising of the values of the named column from the selected rows.
 
@@ -1124,7 +1123,7 @@ class DatabasePool(object):
             retcol: column whos value we wish to retrieve.
 
         Returns:
-            Deferred: Results in a list
+            Results in a list
         """
         return self.runInteraction(
             desc, self.simple_select_onecol_txn, table, keyvalues, retcol
@@ -1136,7 +1135,7 @@ class DatabasePool(object):
         keyvalues: Optional[Dict[str, Any]],
         retcols: Iterable[str],
         desc: str = "simple_select_list",
-    ) -> defer.Deferred:
+    ) -> Awaitable[List[Dict[str, Any]]]:
         """Executes a SELECT query on the named table, which may return zero or
         more rows, returning the result as a list of dicts.
 
@@ -1147,7 +1146,7 @@ class DatabasePool(object):
                 apply a WHERE clause.
             retcols: the names of the columns to return
         Returns:
-            defer.Deferred: resolves to list[dict[str, Any]]
+            A list of dictionaries.
         """
         return self.runInteraction(
             desc, self.simple_select_list_txn, table, keyvalues, retcols
@@ -1281,7 +1280,7 @@ class DatabasePool(object):
         keyvalues: Dict[str, Any],
         updatevalues: Dict[str, Any],
         desc: str,
-    ) -> defer.Deferred:
+    ) -> Awaitable[int]:
         return self.runInteraction(
             desc, self.simple_update_txn, table, keyvalues, updatevalues
         )
@@ -1314,7 +1313,7 @@ class DatabasePool(object):
         keyvalues: Dict[str, Any],
         updatevalues: Dict[str, Any],
         desc: str = "simple_update_one",
-    ) -> defer.Deferred:
+    ) -> Awaitable[None]:
         """Executes an UPDATE query on the named table, setting new values for
         columns in a row matching the key values.
 
@@ -1374,7 +1373,7 @@ class DatabasePool(object):
 
     def simple_delete_one(
         self, table: str, keyvalues: Dict[str, Any], desc: str = "simple_delete_one"
-    ) -> defer.Deferred:
+    ) -> Awaitable[None]:
         """Executes a DELETE query on the named table, expecting to delete a
         single row.
 
@@ -1428,7 +1427,7 @@ class DatabasePool(object):
         iterable: Iterable[Any],
         keyvalues: Dict[str, Any],
         desc: str,
-    ) -> defer.Deferred:
+    ) -> Awaitable[int]:
         return self.runInteraction(
             desc, self.simple_delete_many_txn, table, column, iterable, keyvalues
         )
@@ -1523,7 +1522,7 @@ class DatabasePool(object):
         keyvalues: Optional[Dict[str, Any]] = None,
         order_direction: str = "ASC",
         desc: str = "simple_select_list_paginate",
-    ) -> defer.Deferred:
+    ) -> Awaitable[List[Dict[str, Any]]]:
         """
         Executes a SELECT query on the named table with start and limit,
         of row numbers, which may return zero or number of rows from start to limit,
@@ -1543,7 +1542,7 @@ class DatabasePool(object):
                 apply a WHERE clause.
             order_direction: Whether the results should be ordered "ASC" or "DESC".
         Returns:
-            defer.Deferred: resolves to list[dict[str, Any]]
+            A list of dictionaries
         """
         return self.runInteraction(
             desc,
@@ -1629,7 +1628,7 @@ class DatabasePool(object):
         col: str,
         retcols: Iterable[str],
         desc="simple_search_list",
-    ):
+    ) -> Awaitable[Optional[List[Dict[str, Any]]]]:
         """Executes a SELECT query on the named table, which may return zero or
         more rows, returning the result as a list of dicts.
 
@@ -1640,7 +1639,7 @@ class DatabasePool(object):
             retcols: the names of the columns to return
 
         Returns:
-            defer.Deferred: resolves to list[dict[str, Any]] or None
+            A list of dictionaries or 0
         """
 
         return self.runInteraction(
