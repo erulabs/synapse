@@ -30,9 +30,11 @@ from typing import (
     Tuple,
     TypeVar,
     Union,
+    overload,
 )
 
 from prometheus_client import Histogram
+from typing_extensions import Literal
 
 from twisted.enterprise import adbapi
 
@@ -1018,6 +1020,28 @@ class DatabasePool(object):
             args.append(tuple(x) + tuple(y))
 
         return txn.execute_batch(sql, args)
+
+    @overload
+    def simple_select_one(
+        self,
+        table: str,
+        keyvalues: Dict[str, Any],
+        retcols: Iterable[str],
+        allow_none: Literal[False] = False,
+        desc: str = "simple_select_one",
+    ) -> Awaitable[Dict[str, Any]]:
+        ...
+
+    @overload
+    def simple_select_one(
+        self,
+        table: str,
+        keyvalues: Dict[str, Any],
+        retcols: Iterable[str],
+        allow_none: Literal[True] = True,
+        desc: str = "simple_select_one",
+    ) -> Awaitable[Optional[Dict[str, Any]]]:
+        ...
 
     def simple_select_one(
         self,
