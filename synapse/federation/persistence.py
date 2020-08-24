@@ -39,7 +39,7 @@ class TransactionActions(object):
         origin?
 
         Returns:
-            Deferred: Results in `None` if we have not previously responded to
+            Awaitable: Results in `None` if we have not previously responded to
             this transaction or a 2-tuple of `(int, dict)` representing the
             response code and response body.
         """
@@ -53,7 +53,7 @@ class TransactionActions(object):
         """ Persist how we responded to a transaction.
 
         Returns:
-            Deferred
+            Awaitable
         """
         if not transaction.transaction_id:
             raise RuntimeError("Cannot persist a transaction with no transaction_id")
